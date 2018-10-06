@@ -92,14 +92,42 @@ public:
 		message[2] = 40;
 		midout->sendMessage( &message );
 	}
-
+	void readInputs() {
+		std::vector<unsigned char> message;
+		double timeDelta = 0;
+		std::string types[3] = {"type ", "key ", "velocity "};
+		bool initializing = true;
+		int nBytes = 0;
+		
+		midin->ignoreTypes(false,false,false);	
+			
+		std::cout << "Reading Midi Input... Ctrl+C to quit for now...\n";
+		
+		while(true){
+			timeDelta = midin->getMessage(&message);
+			if(timeDelta > 0.01 && initializing) {
+				initializing = false;
+				std::cout << "Connection is ready \n";
+			}
+			nBytes = message.size();
+			for(int i=0; i < nBytes; i++){
+				if(!initializing){
+					std::cout << types[i%3]<< (int)message[i] << ", ";
+				}
+			}
+			if(nBytes > 0){
+				std::cout << ", time_delta " << timeDelta << std::endl;
+			}
+			usleep(10000);
+		}
+	}
 };
 
 
 int main(){
 	MidiProbe probe;
 	int status = probe.probePorts();
-	std::string setting = "output";
+	std::string setting = "input";
 	if(status != 0){
 		std::cout << "An error occured during port probing!\nProgram must now exit\n";
 		return 0;
@@ -119,7 +147,13 @@ int main(){
 		}
 	}
 	else{
-		
+		status = probe.bindInput(status);
+		if(status == -1){
+			std::cout << "an error occured in binding port!\nProgram must now exit\n";
+			return 0;
+		}
+		probe.readInputs();
 	}
+	return 0;
 	
 }
