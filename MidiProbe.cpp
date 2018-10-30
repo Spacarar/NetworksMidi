@@ -105,7 +105,7 @@ void printInputCallback( double deltatime, std::vector< unsigned char > *message
 	static std::string types[3] = {"type ", "key ", "velocity "};
 	unsigned int nBytes = message->size();
 	for ( unsigned int i=0; i<nBytes; i++ )
-	std::cout << "Byte " << i << " = " << (int)message->at(i) << ", ";
+	std::cout << types[i%3] << " = " << (int)message->at(i) << ", ";
 	if ( nBytes > 0 )
 	std::cout << "stamp = " << deltatime << std::endl;
 }
