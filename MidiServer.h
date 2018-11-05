@@ -34,6 +34,13 @@ protected:
 	
 	int configurePort();
 	int bindServer();
+	
+	//when a server succesfully connects to a client the greeting should be sent
+	//greeting says hello from server, hello from client. 
+	//server then displays the connected midi devices on the server side
+	//client response should be the port number they wish to listen to
+	//server and client then exchange midi information and responses.
+	int sendGreeting();
 
 public:
 	MidiServer();
