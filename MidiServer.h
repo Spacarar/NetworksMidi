@@ -34,6 +34,7 @@ protected:
 	
 	int configurePort();
 	int bindServer();
+	void clearBuffer();
 	
 	//when a server succesfully connects to a client the greeting should be sent
 	//greeting says hello from server, hello from client. 

@@ -29,10 +29,13 @@ int MidiServer::bindServer(){
 	cout << "port: "<<this->portno<<"  bound to server"<<endl;
 	return 0;
 }
-
+void MidiServer:clearBuffer(){
+	memset(this->buffer, 0, this->buffer_size);
+}
 MidiServer::MidiServer(){
 	this->client_fd = this->server_fd = this->valread = 0;
 	this->configurePort();
+	this->clearBuffer();
 }
 MidiServer::MidiServer(int portNum){
 	this->client_fd = this->server_fd = this->valread = 0;
@@ -43,5 +46,6 @@ MidiServer::MidiServer(int portNum){
 	else{
 		this->portno = portNum;
 	}
+	this->clearBuffer();
 }
 	

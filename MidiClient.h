@@ -27,6 +27,7 @@ class MidiClient{
 	//receive midi info from server, send response of info
 	//play midi data received as it is received.
 	int sendGreeting();
+	void clearBuffer();
 public:
 	MidiClient(string ip_addr="127.0.0.1", int portno=4445);
 
