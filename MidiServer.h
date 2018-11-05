@@ -28,12 +28,10 @@ protected:
 	int client_fd;
 	int valread;
 	struct sockaddr_in address;
-	std::string ip_address;
 	int portno;
 	
 	RtMidiIn *midi;
 	
-	int configureIp();
 	int configurePort();
 	int bindServer();
 
