@@ -42,7 +42,11 @@ protected:
 	//client response should be the port number they wish to listen to
 	//server and client then exchange midi information and responses.
 	int sendGreeting();
-
+	int configureMidiPort();
+	
+	
+	void sendSuccess();
+	
 public:
 	MidiServer();
 	MidiServer(std::string ipAddress, int portNum);
