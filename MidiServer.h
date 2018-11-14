@@ -36,6 +36,7 @@ protected:
 	int bindServer();
 	void clearBuffer();
 	
+	int awaitConnection();
 	//when a server succesfully connects to a client the greeting should be sent
 	//greeting says hello from server, hello from client. 
 	//server then displays the connected midi devices on the server side

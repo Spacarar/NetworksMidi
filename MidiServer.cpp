@@ -1,5 +1,25 @@
 #include "MidiServer.h"
 
+//CONSTRUCTORS
+MidiServer::MidiServer(){
+	this->client_fd = this->server_fd = this->valread = 0;
+	this->configurePort();
+	this->clearBuffer();
+}
+MidiServer::MidiServer(int portNum){
+	this->client_fd = this->server_fd = this->valread = 0;
+	if(portNum < 1024){
+		cout << "port must be standard user access (# > 1024)"<<endl;
+		this->configurePort();
+	}
+	else{
+		this->portno = portNum;
+	}
+	this->clearBuffer();
+}
+
+
+//SERVER CONFIGURATION
 int MidiServer::configurePort(){
 	cout << "defaulting to port 4445"<<endl;
 	this->portno = 4445;
@@ -29,23 +49,39 @@ int MidiServer::bindServer(){
 	cout << "port: "<<this->portno<<"  bound to server"<<endl;
 	return 0;
 }
+
+
 void MidiServer:clearBuffer(){
 	memset(this->buffer, 0, this->buffer_size);
 }
-MidiServer::MidiServer(){
-	this->client_fd = this->server_fd = this->valread = 0;
-	this->configurePort();
-	this->clearBuffer();
+
+int MidiServer::awaitConnection(){
+	return listen(sock_fd, 5);
 }
-MidiServer::MidiServer(int portNum){
-	this->client_fd = this->server_fd = this->valread = 0;
-	if(portNum < 1024){
-		cout << "port must be standard user access (# > 1024)"<<endl;
-		this->configurePort();
-	}
-	else{
-		this->portno = portNum;
+
+int MidiServer::sendGreeting() {
+	if(!sock_fd){
+		cout << "sock_fd not yet defined?" <<endl;
+		return -1;
 	}
 	this->clearBuffer();
+	send(sock_fd, "Welcome to the Network Midi Server by Shawn Pacarar", 51, 0)
+	valread = read(sock_fd, buffer, buffer_size)
+	if(!valread){
+		cout << "nothing here, client likely got disconnected" <<endl;
+		return -1;
+	}
+	cout << buffer <<endl;
+	return 0;
 }
+	
+int MidiServer::sendMidiPortInformation(){
+	//probe midi ports
+	//construct a message to send where size is known
+	//send message to client
+	//attempt listening to port
+	//if success send success
+	//otherwise send over errors
+}
+
 	
