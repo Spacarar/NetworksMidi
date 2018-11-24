@@ -2,12 +2,14 @@
 
 //CONSTRUCTORS
 MidiServer::MidiServer(){
-	this->client_fd = this->server_fd = this->valread = 0;
+	midi = new RtMidiIn();
+	this->server_fd = this->client_fd = this->valread = 0;
 	this->configurePort();
 	this->clearBuffer();
 }
 MidiServer::MidiServer(int portNum){
-	this->client_fd = this->server_fd = this->valread = 0;
+	midi = new RtMidiIn();
+	this->server_fd = this->client_fd = this->valread = 0;
 	if(portNum < 1024){
 		cout << "port must be standard user access (# > 1024)"<<endl;
 		this->configurePort();
@@ -18,6 +20,52 @@ MidiServer::MidiServer(int portNum){
 	this->clearBuffer();
 }
 
+MidiServer::~MidiServer(){
+	if(this->midi != nullptr){
+		if(midi->isPortOpen()){
+			midi->closePort();
+		}
+		delete midi;
+	}
+}
+
+//success message agreed upon by server/client
+void MidiServer::sendSuccess(){
+	if(!client_fd){
+		cout << "server not yet bound attempting to send success"<<endl;
+		return;
+	}
+	send(client_fd, "success\n", 8, 0);
+}
+
+//START SERVER
+void MidiServer::startServer(){
+	int result = 0;
+	cout << "starting midi server" <<endl;
+	
+	result = this->bindServer();
+	if(result == -1) return;
+	cout << "server bound and ready"<<endl;
+	
+	result = this->awaitConnection();
+	if(result == -1) return;
+	cout << "connection established" <<endl;
+	
+	result = this->sendGreeting();
+	if(result == -1)return;
+	cout << "greeting sent succesfully"<<endl;
+	
+	result = this->sendMidiPortInformation();
+	if(result == -1){
+		//this could be retried?
+		return;
+	}
+	//at this step server configuration should be complete
+	//the midi input port should be bound
+	//the server is ready to listen to music.
+	this->sendSuccess();
+	cout << "midi port succesfully bound and success message sent"<<endl;
+}
 
 //SERVER CONFIGURATION
 int MidiServer::configurePort(){
@@ -28,7 +76,7 @@ int MidiServer::configurePort(){
 int MidiServer::bindServer(){
 	int opt = 1;
 	//set server file descriptor
-	this->server_fd = socket(AF_INET, SOCK_STERAM, 0);
+	this->server_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if(this->server_fd == 0){
 		cout << "error setting file descriptor"<<endl;
 		return -1;
@@ -51,22 +99,30 @@ int MidiServer::bindServer(){
 }
 
 
-void MidiServer:clearBuffer(){
+void MidiServer::clearBuffer(){
 	memset(this->buffer, 0, this->buffer_size);
 }
 
 int MidiServer::awaitConnection(){
-	return listen(sock_fd, 5);
+	if (listen(server_fd, 5) < 0){
+		return -1;
+	}
+	else {
+		int addrlen = sizeof(address);
+		client_fd = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
+	}
+		
+	return client_fd;
 }
 
 int MidiServer::sendGreeting() {
-	if(!sock_fd){
-		cout << "sock_fd not yet defined?" <<endl;
+	if(!server_fd){
+		cout << "server_fd not yet defined?" <<endl;
 		return -1;
 	}
 	this->clearBuffer();
-	send(sock_fd, "Welcome to the Network Midi Server by Shawn Pacarar", 51, 0)
-	valread = read(sock_fd, buffer, buffer_size)
+	send(client_fd, "Welcome to the Network Midi Server by Shawn Pacarar", 51, 0);
+	valread = read(client_fd, buffer, buffer_size);
 	if(!valread){
 		cout << "nothing here, client likely got disconnected" <<endl;
 		return -1;
@@ -82,6 +138,46 @@ int MidiServer::sendMidiPortInformation(){
 	//attempt listening to port
 	//if success send success
 	//otherwise send over errors
+	
+	int inPorts = midi->getPortCount();
+	std::string currentPortName = "";
+	if(inPorts == -1){
+		return -1;
+	}
+	string message = "";
+	message += "(input ports: " + to_string(inPorts)  +")\n";
+	std::cout << "(input ports: " << inPorts <<")\n";
+	for(int i = 0; i < inPorts; i++){
+		try {
+			currentPortName = midi->getPortName(i);
+		}	
+		catch(RtMidiError &error) {
+			error.printMessage();
+			return -1;
+		}
+		message +=  "Input Port #" + to_string(i) + " : " + currentPortName;
+		std::cout << " Input Port #" <<i<<" : "<<currentPortName << std::endl;
+	}
+	send(client_fd, message.c_str(), message.size(), 0);
+	this->clearBuffer();
+	valread = read(client_fd, buffer, buffer_size);
+	if(!valread){
+		cout << "nothing here, client likely got disconnected" <<endl;
+		return -1;
+	}
+	try{
+		int mPort = -1;
+		//1 digit response
+		//offset unsigned char by 48 for integer... lame way but idk what else would work
+		mPort = int(buffer[0]) - 48;
+		cout << mPort<<endl;
+		midi->openPort(mPort);
+	}
+	catch(RtMidiError &e){
+		e.printMessage();
+		return -1;
+	}
+	return 0;
 }
 
 	

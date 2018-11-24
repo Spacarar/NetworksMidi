@@ -6,26 +6,30 @@
 
 #pragma once
 
-#include <stdlib>
+//c libraries must be used for some of the operations used
+//so these need to be brought in as c++ equivs of old c headers
+#include <cstring>
+#include <cstdio>
+#include <cstdlib>
+
 #include <unistd.h>
-#include <sys/types>
-#include <sys/socket>
+#include <sys/types.h>
+#include <sys/socket.h>
 #include <netinet/in.h>
 #include <iostream>
-#include <string>
 #include <fstream>
-#include <cstdlib>
 #include <vector>
 
+// external libraries used
 #include "rtmidi-3.0.0/RtMidi.h"
 
+using namespace std;
 class MidiServer{
 protected:
-	const unsigned int buffer_size = 4096;
+	static const unsigned int buffer_size = 4096;
 	unsigned char buffer[buffer_size]; //buffer used by server to send messages
 	std::vector<unsigned char> midiBuffer; //buffer used by midi to read input
-	int server_fd;
-	int client_fd;
+	int server_fd, client_fd;
 	int valread;
 	struct sockaddr_in address;
 	int portno;
@@ -43,6 +47,7 @@ protected:
 	//client response should be the port number they wish to listen to
 	//server and client then exchange midi information and responses.
 	int sendGreeting();
+	int sendMidiPortInformation();
 	int configureMidiPort();
 	
 	
@@ -50,6 +55,7 @@ protected:
 	
 public:
 	MidiServer();
-	MidiServer(std::string ipAddress, int portNum);
-	~MidiServer
+	MidiServer(int portNum);
+	void startServer();
+	~MidiServer();
 };

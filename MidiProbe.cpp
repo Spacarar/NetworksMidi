@@ -17,8 +17,8 @@ MidiProbe::MidiProbe(){
 		error.printMessage();
 		exit(EXIT_FAILURE);
 	}
-	}
-	MidiProbe::~MidiProbe(){
+}
+MidiProbe::~MidiProbe(){
 	if(midin != nullptr){
 		if(midin->isPortOpen()){
 			midin->closePort();
