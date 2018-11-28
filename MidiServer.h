@@ -49,7 +49,9 @@ protected:
 	int sendGreeting();
 	int sendMidiPortInformation();
 	int configureMidiPort();
-	
+	int readMidiInput();//read from bound port
+	static void convertMidiInput(double deltatime, std::vector< unsigned char > *message, void *userData);//send to client (callback)
+	void sendMidiInput(string &message); //called by convert
 	
 	void sendSuccess();
 	

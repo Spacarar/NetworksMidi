@@ -38,6 +38,7 @@ class MidiClient{
 	//play midi data received as it is received.
 	int sendGreeting();
 	int configureMidiPort();
+	int listenToMidiInput();
 	void clearBuffer();
 	bool isSuccess(int length); //send valread to isSuccess and it will read buffer
 public:

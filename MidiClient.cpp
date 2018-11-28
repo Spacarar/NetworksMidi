@@ -24,6 +24,10 @@ void MidiClient::startClient(){
 	if(result < 0) return;
 	cout << "midi port successfully set" << endl;
 	
+	while(result == 0){
+		result = listenToMidiInput();
+	}
+	
 }
 
 void MidiClient::clearBuffer(){
@@ -60,7 +64,13 @@ int MidiClient::sendGreeting(){
 	clearBuffer();
 	valread = read(sock_fd, buffer, buffer_size);
 	cout << "Midi Ports available from server"<<endl;
-	cout << buffer<<endl;
+	for(int i=0; i < valread && i < (int)buffer_size; i++){
+		if(buffer[i]=='#'){
+			cout << endl;
+		}
+		cout << buffer[i];
+	}
+	cout << endl;
 	return 0;
 }
 
@@ -68,7 +78,7 @@ int MidiClient::configureMidiPort(){
 	bool configured = false;
 	string userInput = "";
 	while(!configured){
-		cout << "#:"<<endl;
+		cout << "#:";
 		cin >> userInput;
 		send(sock_fd, userInput.c_str(), userInput.size(), 0);
 		clearBuffer();
@@ -78,11 +88,38 @@ int MidiClient::configureMidiPort(){
 			configured = true;
 		} else {
 			cout << "error binding midi port"<<endl;
-			cout << buffer <<endl;
+			for(int i=0; i < valread && i < (int)buffer_size; i++){
+				if(buffer[i]=='#'){
+					cout << endl;
+				}
+				cout << buffer[i];
+			}
+			cout << endl;
 			configured = false;
-		}
-			
+		}	
 	}
+	return 0;
+}
+
+
+int MidiClient::listenToMidiInput(){
+	if(!sock_fd){
+		cout << "no connection to server?"<<endl;
+		return -1;
+	}
+	clearBuffer();
+	valread = read(sock_fd, buffer, buffer_size);
+	if(!valread){
+		cout << "no data in valread, did server get disconnected?" <<endl;
+		return -1;
+	}
+	cout << "Valread: "<<valread<<endl;
+	//read each value from buffer as integer to make it more readable
+	//ensure that we don't read outside buffer limits or outside valread limit
+	for(int i = 0; i  < valread && i < (int)buffer_size; i++){
+		cout << (int)buffer[i]<< ' ';
+	}
+	cout << endl;
 	return 0;
 }
 
