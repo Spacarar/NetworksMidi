@@ -113,7 +113,7 @@ int MidiClient::listenToMidiInput(){
 		cout << "no data in valread, did server get disconnected?" <<endl;
 		return -1;
 	}
-	cout << "Valread: "<<valread<<endl;
+	//cout << "Valread: "<<valread<<endl;
 	//read each value from buffer as integer to make it more readable
 	//ensure that we don't read outside buffer limits or outside valread limit
 	for(int i = 0; i  < valread && i < (int)buffer_size; i++){

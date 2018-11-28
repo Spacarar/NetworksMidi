@@ -232,7 +232,8 @@ void MidiServer::convertMidiInput(double deltatime, std::vector< unsigned char >
 	unsigned int nBytes = message->size();
 	for ( unsigned int i=0; i<nBytes; i++ ){
 		cout << types[i%3] << " = " << (int)message->at(i) << ", ";
-		sendData += (int)message->at(i) + ' ';
+		sendData += (int)message->at(i);
+		//cout << "sendData: "<<sendData<<endl;
 	}
 	if ( nBytes > 0 ){
 		cout << "stamp = " << deltatime << std::endl;
